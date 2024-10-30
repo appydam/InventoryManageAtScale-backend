@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Use a non-interactive backend
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 import pickle
@@ -9,28 +9,24 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Global model variable
 model = None
 
 def train_model():
     global model
-    # Load data with an extra 'date' column
+
     data = pd.read_csv("historical_inventory.csv", header=0)
 
     # Convert 'timestamp' to datetime
     data['timestamp'] = pd.to_datetime(data['timestamp'], errors='coerce')
 
-    # Drop rows with NaT values in 'timestamp'
     data = data.dropna(subset=['timestamp'])
 
-    # Extract additional features from the timestamp
     data['day_of_week'] = data['timestamp'].dt.dayofweek
     data['hour_of_day'] = data['timestamp'].dt.hour
     data['days_since_start'] = (data['timestamp'] - data['timestamp'].min()).dt.days  # Days since the first date
 
-    # Define features and target
     X = data[['day_of_week', 'hour_of_day', 'days_since_start', 'stock_level']]
-    y = data['stock_level'].shift(-1).fillna(0)  # Predict next stock level
+    y = data['stock_level'].shift(-1).fillna(0)
 
     # Visualization of the stock level over time
     plt.figure(figsize=(10, 6))
@@ -40,8 +36,8 @@ def train_model():
     plt.ylabel('Stock Level')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('stock_levels_over_time.png')  # Save the plot as an image
-    plt.close()  # Close the figure to free up memory
+    plt.savefig('stock_levels_over_time.png')
+    plt.close()
 
     # Train the model
     model = LinearRegression()
@@ -62,9 +58,9 @@ def train():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
-    date_str = data['date']  # Expecting a date string in 'YYYY-MM-DD' format
-    hour_of_day = data['hour_of_day']  # Hour input as integer
-    current_stock = data['current_stock']  # Current stock level as integer
+    date_str = data['date']  # 'YYYY-MM-DD' format
+    hour_of_day = data['hour_of_day']
+    current_stock = data['current_stock']
 
     prediction = predict_stock(date_str, hour_of_day, current_stock)
     return jsonify({'predicted_stock': prediction})
@@ -75,15 +71,13 @@ def predict_stock(date_str, hour_of_day, current_stock):
         with open('inventory_model.pkl', 'rb') as file:
             model = pickle.load(file)
 
-    # Convert the date string to a datetime object
     input_date = pd.to_datetime(date_str)
 
     # Calculate the day of the week and days since start
     day_of_week = input_date.dayofweek  # 0 = Monday, ..., 6 = Sunday
-    start_date = pd.to_datetime('2024-10-25')  # Replace with the actual minimum date from your data if needed
+    start_date = pd.to_datetime('2024-10-25')
     days_since_start = (input_date - start_date).days
 
-    # Create a DataFrame with correct feature names
     input_data = pd.DataFrame([[day_of_week, hour_of_day, days_since_start, current_stock]],
                               columns=['day_of_week', 'hour_of_day', 'days_since_start', 'stock_level'])
 
@@ -91,4 +85,4 @@ def predict_stock(date_str, hour_of_day, current_stock):
     return prediction[0]
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001)  # Run on port 5000
+    app.run(host='0.0.0.0', port=5001)
