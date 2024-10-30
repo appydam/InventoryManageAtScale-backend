@@ -29,6 +29,11 @@ public class InventoryController {
         return inventoryService.createInventory(inventory);
     }
 
+    @GetMapping("/{itemId}")
+    public Inventory getInventory(@PathVariable String itemId) {
+        return inventoryService.getInventory(itemId);
+    }
+
     @PutMapping("/{itemId}/stock")
     public Inventory updateStock(@PathVariable String itemId, @RequestParam int newStock) {
         return inventoryService.updateStock(itemId, newStock);

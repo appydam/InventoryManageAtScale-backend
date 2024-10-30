@@ -44,19 +44,50 @@ public class InventoryService implements IInventoryService {
 //        return inventoryRepository.save(inventory);
 //    }
 
+
     public Inventory updateStock(String itemId, int newStock) {
-        Inventory inventory = inventoryRepository.findById(itemId).orElseThrow();
-        inventory.setCurrentStock(newStock);
-        Inventory updatedInventory = inventoryRepository.save(inventory);
+        try {
+            Inventory inventory = inventoryRepository.findById(itemId)
+                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
 
-        // Log to InventoryHistory
-        InventoryHistory history = new InventoryHistory();
-        history.setItemId(itemId);
-        history.setStockLevel(newStock);
-        history.setTimestamp(LocalDateTime.now());
-        dynamoDBMapper.save(history);
+            inventory.setCurrentStock(newStock);
+            Inventory updatedInventory = inventoryRepository.save(inventory);
+            System.out.println("updatedInventory = " + updatedInventory);
 
-        return updatedInventory;
+            // Log to InventoryHistory
+            InventoryHistory history = new InventoryHistory();
+            history.setItemId(itemId);
+            history.setStockLevel(newStock);
+            history.setTimestamp(LocalDateTime.now());
+            dynamoDBMapper.save(history);
+
+            return updatedInventory;
+
+        } catch (Exception e) {
+            // Log the exception (use your preferred logging framework)
+            System.err.println("Error updating stock: " + e.getMessage());
+            throw new RuntimeException("Failed to update stock for item: " + itemId, e);
+        }
+    }
+
+//    public Inventory updateStock(String itemId, int newStock) {
+//        Inventory inventory = inventoryRepository.findById(itemId).orElseThrow();
+//        inventory.setCurrentStock(newStock);
+//        Inventory updatedInventory = inventoryRepository.save(inventory);
+//
+//        // Log to InventoryHistory
+//        InventoryHistory history = new InventoryHistory();
+//        history.setItemId(itemId);
+//        history.setStockLevel(newStock);
+//        history.setTimestamp(LocalDateTime.now());
+//        dynamoDBMapper.save(history);
+//
+//        return updatedInventory;
+//    }
+
+    @Override
+    public Inventory getInventory(String itemId) {
+        return inventoryRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Inventory item not found: " + itemId));
     }
 
     public List<Inventory> findItemsByStockLevel(int stockLevel) {

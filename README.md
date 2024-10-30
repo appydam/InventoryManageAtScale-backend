@@ -1,4 +1,4 @@
-# DilFoods Backend API
+# DilFoods Backend
 
 ## Overview
 This DilFoods project aims to develop a comprehensive full-stack web application designed to manage inventory using QR codes, enhanced with a predictive analytics feature to forecast inventory needs through machine learning which enables businesses to optimize their stock levels and reduce wastage.
@@ -10,6 +10,8 @@ Designed this app with scalability and extensibility in mind, and follows the be
 **Database** - DynamoDB (highly scalable distributed database)
 
 **Author**: Arpit Dhamija | [linkedin](https://www.linkedin.com/in/arpitdhamija/)
+
+
 ## Table of Contents
 
 1. [How to Run backend](#how-to-run)
@@ -46,12 +48,32 @@ Designed this app with scalability and extensibility in mind, and follows the be
    Create the required tables by running the following commands in your terminal:
 
    ```bash
-   aws dynamodb create-table        --table-name Inventory        --attribute-definitions            AttributeName=itemId,AttributeType=S        --key-schema            AttributeName=itemId,KeyType=HASH        --provisioned-throughput            ReadCapacityUnits=5,WriteCapacityUnits=5        --endpoint-url http://localhost:8000
+   aws dynamodb create-table        
+   --table-name Inventory        
+   --attribute-definitions  AttributeName=itemId,AttributeType=S        
+   --key-schema  AttributeName=itemId,KeyType=HASH        
+   --provisioned-throughput  ReadCapacityUnits=5,WriteCapacityUnits=5        
+   --endpoint-url http://localhost:8000
    ```
 
    ```bash
-   aws dynamodb create-table        --table-name Batch        --attribute-definitions            AttributeName=batchId,AttributeType=S        --key-schema            AttributeName=batchId,KeyType=HASH        --provisioned-throughput            ReadCapacityUnits=5,WriteCapacityUnits=5        --endpoint-url http://localhost:8000
+   aws dynamodb create-table       
+    --table-name Batch       
+    --attribute-definitions  AttributeName=batchId,AttributeType=S        
+   --key-schema  AttributeName=batchId,KeyType=HASH        
+   --provisioned-throughput  ReadCapacityUnits=5,WriteCapacityUnits=5        
+   --endpoint-url http://localhost:8000
    ```
+   
+    ```bash
+      aws dynamodb create-table \
+        --table-name InventoryHistory \
+        --attribute-definitions AttributeName=id,AttributeType=S \
+        --key-schema AttributeName=id,KeyType=HASH \
+        --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+        --endpoint-url http://localhost:8000
+    
+    ```
 
 5. **Managing Tables:**
     - **Delete Table:**
@@ -94,6 +116,20 @@ Designed this app with scalability and extensibility in mind, and follows the be
 **Response:**  
 Returns the created Batch object.
 
+Example output:
+```
+{
+    "batchId": "B001",
+    "productId": "P124",
+    "receivedDate": "2024-10-29T12:00:00",
+    "quantity": 100,
+    "qrCodeUrl": "http://localhost:8080/api/qrcodes/B001"
+}
+```
+This QR code is mapped to BatchId: `B001`
+
+![Project Dashboard](qrcodes/B001.png)
+
 ---
 
 #### 2. Get Batch
@@ -117,6 +153,10 @@ Returns the Batch object for the specified `batchId`.
 **Request Parameter:**
 - `qrCodeFilePath`: Path to the QR code file.
 
+```bash
+curl --location 'http://localhost:8080/api/batches/qrCode?qrCodeFilePath=.%2Fqrcodes%2FB001.png'
+```
+
 **Response:**  
 Returns the Batch object decoded from the specified QR code.
 
@@ -131,8 +171,7 @@ Returns the Batch object decoded from the specified QR code.
 - `batchId`: ID of the batch for which the QR code is requested.
 
 **Response:**  
-Returns the QR code image as a byte array.
-
+Returns the QR code image as a _byte array_.
 ---
 
 ### Inventory Management API
@@ -183,12 +222,25 @@ Returns a list of all Inventory objects.
 
 ---
 
+#### 4. Get Inventory
+
+**Endpoint:**  
+`GET /api/inventory/{item_id}`
+
+**Response:**  
+Returns a Inventory object.
+
+---
+
 ### Machine Learning Prediction API
 
 #### 1. Train Model
 
 **Endpoint:**  
 `POST /api/ml/train`
+```bash
+curl --location --request POST 'http://localhost:8080/api/ml/train'
+```
 
 **Response:**  
 Returns a message indicating that model training has been initiated.
@@ -208,10 +260,17 @@ Returns a message indicating that model training has been initiated.
     "currentStock": 200
 }
 ```
+```bash
+curl --location --request POST 'http://localhost:8080/api/inventory/train'
+```
 
 **Response:**  
 Returns a PredictionResponse object containing the predicted stock level.
-
+```
+{
+    "predicted_stock": 240.92391304347802
+}
+```
 ---
 
 ## Inventory Prediction Model Documentation
