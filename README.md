@@ -1,7 +1,7 @@
-# DilFoods Backend
+# Inventory management Backend at scale
 
 ## Overview
-This DilFoods project aims to develop a comprehensive full-stack web application designed to manage inventory using QR codes, enhanced with a predictive analytics feature to forecast inventory needs through machine learning which enables businesses to optimize their stock levels and reduce wastage.
+This Inventory management project aims to develop a comprehensive full-stack web application designed to manage inventory using QR codes, enhanced with a predictive analytics feature to forecast inventory needs through machine learning which enables businesses to optimize their stock levels and reduce wastage.
 
 Designed this app with scalability and extensibility in mind, and follows the best coding practices and industry standards
 
